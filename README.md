@@ -16,22 +16,46 @@ The system follows a microservices architecture with the following components:
 
 ```
 forecast-generation-engine/
-├── proto/                      # Protocol buffer definitions
+├── proto/                        # Protocol buffer definitions
 │   └── forecast_service.proto
-├── services/                   # Microservices
-│   ├── data_preprocessing/     # Data cleaning and preparation
-│   ├── segmentation/          # Data segmentation logic
-│   ├── outlier_cleansing/     # Anomaly detection and cleaning
-│   └── forecast_generation/   # Core forecasting algorithms
-├── common/                    # Shared utilities and models
-│   ├── models.py             # Data models and schemas
-│   └── utils.py              # Common utilities
-├── gateway/                   # API gateway
-│   └── api_gateway.py
-├── tests/                     # Unit and integration tests
-├── docker-compose.yml         # Container orchestration
-├── Dockerfile                 # Container definition
-└── requirements.txt           # Python dependencies
+├── services/                     # Microservices
+│   ├── data_preprocessing/       # Data cleaning and preparation
+│   │   ├── __init__.py
+│   │   ├── server.py            # gRPC server implementation
+│   │   ├── service.py           # Business logic
+│   │   └── requirements.txt     # Service dependencies
+│   ├── segmentation/            # Data segmentation logic
+│   │   ├── __init__.py
+│   │   ├── server.py
+│   │   ├── service.py
+│   │   └── requirements.txt
+│   ├── outlier_cleansing/       # Anomaly detection and cleaning
+│   │   ├── __init__.py
+│   │   ├── server.py
+│   │   ├── service.py
+│   │   └── requirements.txt
+│   └── forecast_generation/     # Core forecasting algorithms
+│       ├── __init__.py
+│       ├── server.py
+│       ├── service.py
+│       └── requirements.txt
+├── common/                      # Shared utilities and models
+│   ├── __init__.py
+│   ├── models.py               # Data models and schemas
+│   └── utils.py                # Common utilities
+├── gateway/                     # API gateway
+│   ├── __init__.py
+│   └── api_gateway.py          # Request routing and orchestration
+├── tests/                       # Unit and integration tests
+│   ├── test_data_preprocessing.py
+│   ├── test_segmentation.py
+│   ├── test_outlier_cleansing.py
+│   └── test_forecast_generation.py
+├── docker-compose.yml           # Container orchestration
+├── Dockerfile                   # Container definition
+├── requirements.txt             # Global Python dependencies
+├── setup.py                     # Package setup configuration
+└── README.md                    # Project documentation
 ```
 
 ## Features
