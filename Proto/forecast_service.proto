@@ -1,0 +1,109 @@
+syntax = "proto3";
+
+package forecast;
+
+import "google/protobuf/timestamp.proto";
+
+// Common messages
+message TimeSeries {
+    repeated double values = 1;
+    repeated google.protobuf.Timestamp timestamps = 2;
+    map<string, string> metadata = 3;
+}
+
+message SegmentationResult {
+    string volume_class = 1;  // A, B, C
+    string cov_class = 2;      // X, Y
+    bool intermittent = 3;
+    double density = 4;
+    int32 series_length = 5;
+    string plc_status = 6;     // Discontinuous, New Launch, Mature
+    string trend = 7;          // upward, downward, none
+    bool seasonal = 8;
+    int32 rule_number = 9;
+    double volume_percentage = 10;
+    double coefficient_variation = 11;
+}
+
+message OutlierResult {
+    TimeSeries corrected_series = 1;
+    repeated int32 outlier_indices = 2;
+    string method_used = 3;  // Fixed Sigma, Rolling Sigma, Seasonal IQR
+    string correction_type = 4;  // Limit, Interpolation
+}
+
+message ForecastResult {
+    repeated double forecast_values = 1;
+    repeated google.protobuf.Timestamp forecast_timestamps = 2;
+    string algorithm_used = 3;
+    double mape = 4;  // Mean Absolute Percentage Error
+    double rmse = 5;  // Root Mean Square Error
+    map<string, double> parameters = 6;
+}
+
+// Service definitions
+service DataPreprocessingService {
+    rpc PreprocessData(PreprocessRequest) returns (PreprocessResponse);
+}
+
+service SegmentationService {
+    rpc SegmentData(SegmentRequest) returns (SegmentResponse);
+}
+
+service OutlierCleansingService {
+    rpc CleanseOutliers(OutlierRequest) returns (OutlierResponse);
+}
+
+service ForecastGenerationService {
+    rpc GenerateForecast(ForecastRequest) returns (ForecastResponse);
+}
+
+// Request/Response messages
+message PreprocessRequest {
+    TimeSeries raw_data = 1;
+    map<string, string> config = 2;
+}
+
+message PreprocessResponse {
+    TimeSeries processed_data = 1;
+    bool success = 2;
+    string message = 3;
+}
+
+message SegmentRequest {
+    TimeSeries data = 1;
+    int32 history_months = 2;
+    map<string, double> thresholds = 3;
+}
+
+message SegmentResponse {
+    SegmentationResult result = 1;
+    bool success = 2;
+    string message = 3;
+}
+
+message OutlierRequest {
+    TimeSeries data = 1;
+    SegmentationResult segmentation = 2;
+    map<string, double> parameters = 3;
+}
+
+message OutlierResponse {
+    OutlierResult result = 1;
+    bool success = 2;
+    string message = 3;
+}
+
+message ForecastRequest {
+    TimeSeries historical_data = 1;
+    OutlierResult cleansed_data = 2;
+    SegmentationResult segmentation = 3;
+    int32 forecast_horizon = 4;
+    map<string, string> config = 5;
+}
+
+message ForecastResponse {
+    ForecastResult result = 1;
+    bool success = 2;
+    string message = 3;
+}

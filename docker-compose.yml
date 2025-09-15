@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  data-preprocessing:
+    build: .
+    command: python -m services.data_preprocessing.server
+    ports:
+      - "50051:50051"
+    environment:
+      - SERVICE_NAME=data-preprocessing
+    networks:
+      - forecast-network
+
+  segmentation:
+    build: .
+    command: python -m services.segmentation.server
+    ports:
+      - "50052:50052"
+    environment:
+      - SERVICE_NAME=segmentation
+    networks:
+      - forecast-network
+
+  outlier-cleansing:
+    build: .
+    command: python -m services.outlier_cleansing.server
+    ports:
+      - "50053:50053"
+    environment:
+      - SERVICE_NAME=outlier-cleansing
+    networks:
+      - forecast-network
+
+  forecast-generation:
+    build: .
+    command: python -m services.forecast_generation.server
+    ports:
+      - "50054:50054"
+    environment:
+      - SERVICE_NAME=forecast-generation
+    networks:
+      - forecast-network
+
+  api-gateway:
+    build: .
+    command: python -m gateway.api_gateway
+    ports:
+      - "5000:5000"
+    depends_on:
+      - data-preprocessing
+      - segmentation
+      - outlier-cleansing
+      - forecast-generation
+    environment:
+      - PREPROCESSING_SERVICE=data-preprocessing:50051
+      - SEGMENTATION_SERVICE=segmentation:50052
+      - OUTLIER_SERVICE=outlier-cleansing:50053
+      - FORECAST_SERVICE=forecast-generation:50054
+    networks:
+      - forecast-network
+
+networks:
+  forecast-network:
+    driver: bridge
